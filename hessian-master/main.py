@@ -11,8 +11,10 @@ class Mode(Enum):
     NoHessian = 0
     FullHessian = 1
     DiagHessian = 2
+    AvgHessian = 3
+    MaxHessian = 4
 
-modes = [Mode.NoHessian, Mode.FullHessian, Mode.DiagHessian]  
+modes = [Mode.NoHessian, Mode.FullHessian, Mode.DiagHessian, Mode.AvgHessian, Mode.MaxHessian]  
 
 
 torch.manual_seed(666)
@@ -104,6 +106,16 @@ if __name__ == '__main__':
                         hessian = hessian.to(device)
                         diag_inv_hessian = 1 / (hessian.diagonal() + hessian_boost)
                         fc2 -= second_order_lr * diag_inv_hessian * fc2_grad
+                    elif mode == Mode.AvgHessian:  
+                        hessian = torch.autograd.functional.hessian(fc2_fwd, (fc2,), strict=True)[0][0]
+                        hessian = hessian.to(device)
+                        avg_hessian_diagonal = 1/(hessian.diagonal().mean()+hessian_boost)
+                        fc2 -= second_order_lr * avg_hessian_diagonal * fc2_grad
+                    elif mode == Mode.MaxHessian:  
+                        hessian = torch.autograd.functional.hessian(fc2_fwd, (fc2,), strict=True)[0][0]
+                        hessian = hessian.to(device)
+                        max_hessian_diagonal = 1/(hessian.diagonal().max()+hessian_boost)
+                        fc2 -= second_order_lr * max_hessian_diagonal * fc2_grad
                     else:
                         assert mode == Mode.NoHessian
                         fc2 -= first_order_lr * fc2_grad
