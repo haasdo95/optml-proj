@@ -70,7 +70,7 @@ def main():
                         help='number of epochs to train (default: 14)')
     parser.add_argument('--gamma', type=float, default=0.7, metavar='M',
                         help='Learning rate step gamma (default: 0.7)')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
+    parser.add_argument('--no-cuda', action='store_true', default=True,
                         help='disables CUDA training')
     parser.add_argument('--no-mps', action='store_true', default=False,
                         help='disables macOS GPU training')
@@ -94,7 +94,10 @@ def main():
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
+        
+    device = torch.device("cpu")    
 
+    
     train_kwargs = {'batch_size': args.batch_size}
     test_kwargs = {'batch_size': args.test_batch_size}
     if use_cuda:
@@ -117,9 +120,9 @@ def main():
 
     lr = 0.0001
     model = Net().to(device)
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
-    # curv_shape = {"Linear": "Diag"}
-    # optimizer = SecondOrderOptimizer(model, curv_type="Cov", curv_shapes=curv_shape, curv_kwargs={}, lr=lr)
+    #optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    curv_shape = {"Linear": "Kron"}
+    optimizer = SecondOrderOptimizer(model, curv_type="Cov", curv_shapes=curv_shape, curv_kwargs={}, lr=lr)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
