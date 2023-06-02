@@ -78,27 +78,29 @@ if __name__ == '__main__':
     classes = ('plane', 'car', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck')
 
-    fc1 = torch.zeros((layer_1_out_width, input_width))
-    nn.init.xavier_uniform_(fc1, gain=nn.init.calculate_gain('relu'))
-    fc1 = fc1.to(device)
-    fc1.requires_grad_()
-
-    fc2 = torch.zeros(layer_1_out_width * layer_2_out_width)
-    nn.init.uniform_(fc2)
-    fc2 = fc2.to(device)
-    fc2.requires_grad_()
+    
     
     avg_training_time = []
     
     plt.figure()    
     for  mode in modes:
+        fc1 = torch.zeros((layer_1_out_width, input_width))
+        nn.init.xavier_uniform_(fc1, gain=nn.init.calculate_gain('relu'))
+        fc1 = fc1.to(device)
+        fc1.requires_grad_()
+
+        fc2 = torch.zeros(layer_1_out_width * layer_2_out_width)
+        nn.init.uniform_(fc2)
+        fc2 = fc2.to(device)
+        fc2.requires_grad_()
+        
         loss_values = []
         iteration_times = []
         for epoch in range(1, epochs + 1):
             # training
             for batch_idx, (data, target) in enumerate(trainloader):
                 data, target = data.to(device), target.to(device)
-                data = torch.flatten(data, start_dim=1).T  # 784 * batch_size
+                data = torch.flatten(data, start_dim=1).T  
                 fc2_inp = torch.relu(fc1 @ data)
                 
                 start_time = time.time()  

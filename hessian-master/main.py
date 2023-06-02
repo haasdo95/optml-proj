@@ -35,7 +35,7 @@ if __name__ == '__main__':
     first_order_lr = 0.01
     second_order_lr = first_order_lr
     hessian_boost = 0.01
-    epochs = 5
+    epochs = 10
     log_interval = 1
     train_kwargs = {'batch_size': 1000}
     test_kwargs = {'batch_size': 1000}
@@ -55,20 +55,24 @@ if __name__ == '__main__':
     train_loader = torch.utils.data.DataLoader(dataset1, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
 
-    fc1 = torch.zeros((layer_1_out_width, input_width))
-    nn.init.xavier_uniform_(fc1, gain=nn.init.calculate_gain('relu'))
-    fc1 = fc1.to(device)
-    fc1.requires_grad_()
 
-    fc2 = torch.zeros(layer_1_out_width * layer_2_out_width)
-    nn.init.uniform_(fc2)
-    fc2 = fc2.to(device)
-    fc2.requires_grad_()
     avg_training_time = []
     plt.figure()
     for  mode in modes:
+        
+        fc1 = torch.zeros((layer_1_out_width, input_width))
+        nn.init.xavier_uniform_(fc1, gain=nn.init.calculate_gain('relu'))
+        fc1 = fc1.to(device)
+        fc1.requires_grad_()
+
+        fc2 = torch.zeros(layer_1_out_width * layer_2_out_width)
+        nn.init.uniform_(fc2)
+        fc2 = fc2.to(device)
+        fc2.requires_grad_()
+        
         loss_values = []
         iteration_times = []
+        
         for epoch in range(1, epochs + 1):
             # training
             for batch_idx, (data, target) in enumerate(train_loader):
