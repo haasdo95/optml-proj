@@ -14,14 +14,12 @@ class Mode(Enum):
     NoHessian = 0
     FullHessian = 1
     DiagHessian = 2
-    AvgHessian = 3
-    MaxHessian = 4
-    AdaHessian = 5
+    AdaHessian = 3
 
 
-modes = [Mode.NoHessian, Mode.FullHessian, Mode.DiagHessian, Mode.AvgHessian, Mode.MaxHessian, Mode.AdaHessian]
+modes = [Mode.NoHessian, Mode.AdaHessian, Mode.DiagHessian, Mode.FullHessian]
 
-mode_str = ['SGD', 'Full Hess', 'Diag Hessian', 'Avg Diag Hess', 'Max Diag Hess', 'AdaHessian']
+mode_str = ['SGD', 'AdaHessian', 'Diag Hessian','Full Hess']
 
 
 torch.manual_seed(1)
@@ -124,19 +122,7 @@ if __name__ == '__main__':
                         hessian = hessian.to(device)
                         diag_hessian = torch.diag(hessian)
                         diag_inv_hessian = 1 / (diag_hessian + hessian_boost)
-                        fc2 -= second_order_lr * diag_inv_hessian * fc2_grad
-
-                    elif mode == Mode.AvgHessian:
-                        hessian = torch.autograd.functional.hessian(fc2_fwd, (fc2,), strict=True)[0][0]
-                        hessian = hessian.to(device)
-                        avg_hessian_diagonal = 1 / (hessian.diagonal().mean() + hessian_boost)
-                        fc2 -= second_order_lr * avg_hessian_diagonal * fc2_grad
-
-                    elif mode == Mode.MaxHessian:
-                        hessian = torch.autograd.functional.hessian(fc2_fwd, (fc2,), strict=True)[0][0]
-                        hessian = hessian.to(device)
-                        max_hessian_diagonal = 1 / (hessian.diagonal().max() + hessian_boost)
-                        fc2 -= second_order_lr * max_hessian_diagonal * fc2_grad
+                        fc2 -= second_order_lr * diag_inv_hessian * fc2_grad 
 
                     elif mode == Mode.NoHessian:
                         fc2 -= first_order_lr * fc2_grad
@@ -177,3 +163,9 @@ if __name__ == '__main__':
     plt.show()
 
     print(avg_training_time)
+    plt.figure()
+    plt.bar(mode_str, avg_training_time, width=0.3)
+    plt.title('Average Training Time')
+    plt.yscale('log')
+    plt.ylabel('Time (seconds)')
+    plt.show()
